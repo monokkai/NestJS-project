@@ -1,0 +1,78 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: ./Nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - users-service
+      - products-service
+      - orders-service
+      - chats-service
+
+  users-mariadb:
+    container_name: users-mariadb-service
+    image: mariadb:latest
+    environment:
+      MYSQL_USER: usersService
+      MYSQL_PASSWORD: usersPass
+      MARIADB_ROOT_PASSWORD: rootPass
+      MARIADB_DATABASE: usersdb
+    ports:
+      - "3306:3306"
+
+  users-service:
+    build:
+      context: ./service1
+    ports:
+      - "3001:3000"
+    container_name: users-service
+    depends_on:
+      - users-mariadb
+    environment:
+      - DATABASE_HOST=users-mariadb
+      - DATABASE_PORT=3306
+      - DATABASE_USER=usersService
+      - DATABASE_PASSWORD=userPassword
+      - DATABASE_NAME=usersdb
+
+  products-mariadb:
+    container_name: products-mariadb-service
+    image: mariadb:latest
+    environment:
+      MYSQL_USER: productsService
+      MYSQL_PASSWORD: prodsPass
+      MARIADB_ROOT_PASSWORD: rootProdPass
+      MARIADB_DATABASE: productsdb
+    ports:
+      - "3307:3306"
+
+  products-service:
+    build:
+      context: ./service2
+    ports:
+      - "3002:3000"
+    container_name: products-service
+    depends_on:
+      - products-mariadb
+    environment:
+      - DATABASE_HOST=products-mariadb
+      - DATABASE_PORT=3306
+      - DATABASE_USER=productsService
+      - DATABASE_PASSWORD=dbPassword
+      - DATABASE_NAME=productsdb
+
+  orders-service:
+    build:
+      context: ./service3
+    ports:
+      - "3003:3000"
+    container_name: orders-service
+
+  chats-service:
+    build:
+      context: ./chat-service
+    ports:
+      - "3004:3000"
+    container_name: chats-service
