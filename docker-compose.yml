@@ -48,6 +48,14 @@ services:
     ports:
       - "3307:3306"
 
+  orders-mongodb:
+    container_name: orders-mongodb-service
+    image: mongo:latest
+    volumes:
+      mongodb_data: /data/db
+    ports:
+      - "27017:27017"
+
   products-service:
     build:
       context: ./service2
