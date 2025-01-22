@@ -1,36 +1,47 @@
-import { Body, Controller, Delete, Get, Put } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+} from '@nestjs/common';
 import { BasketService } from './basket.service';
-import CreateGoodDto from './dto/good.dto';
-import Good from './interfaces/good.interface';
+import GoodDto from '../dto/good.dto';
+import Good from './entity/good';
 
 @Controller('goods')
-export class CatsController {
-    constructor(private readonly basketService: BasketService) {}
+export class BasketController {
+    constructor(private readonly goodService: BasketService) {}
 
-    @Get()
-    public async create(@Body() createGoodData: CreateGoodDto): Promise<Good> {
-        return await this.basketService.create(createGoodData);
-    }
-
-    @Get()
-    public async findAll(): Promise<Good[]> {
-        return await this.basketService.findAll();
-    }
-    @Get()
-    public async findOne(id: string): Promise<Good> {
-        return await this.basketService.findOne(id);
-    }
-    @Put()
-    public async update(id: string, payload: CreateGoodDto): Promise<any> {
-        return await this.basketService.update(id, payload);
-    }
-    @Delete()
-    public async delete(id: string): Promise<Good> {
-        return await this.basketService.delete(id);
+    @Post('new')
+    public async create(
+        @Body() createGoodData: GoodDto,
+    ): Promise<Good | string> {
+        return this.goodService.create(createGoodData);
     }
 
-    // @Patch()
-    // public async addGood(id: string, newIdGood: string): Promise<Good> {
-    //     return await this.basketService.
-    // }
+    @Get('findall')
+    public async findAll(): Promise<Array<Good>> {
+        return this.goodService.findAll();
+    }
+
+    @Get(':id')
+    public async findOne(@Param('id') id: string): Promise<Good> {
+        return this.goodService.findOne(id);
+    }
+
+    @Patch(':id')
+    public async update(
+        @Param('id') id: string,
+        @Body() payload: GoodDto,
+    ): Promise<Good> {
+        return this.goodService.update(id, payload);
+    }
+
+    @Delete(':id')
+    public async deleteOrder(@Param('id') id: string): Promise<any> {
+        return this.goodService.delete(id);
+    }
 }

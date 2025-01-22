@@ -1,36 +1,49 @@
 import { Injectable } from '@nestjs/common';
+import GoodDto from '../dto/good.dto';
+import Good from '../interfaces/good.interface';
 import { InjectModel } from '@nestjs/mongoose';
-import Good from './interfaces/good.interface';
 import { Model } from 'mongoose';
-import CreateGoodDto from './dto/good.dto';
 
 @Injectable()
 export class BasketService {
-    constructor(@InjectModel('Good') private readonly goodModel: Model<Good>) {}
+    constructor(
+        @InjectModel('Good') private readonly goodModule: Model<Good>,
+    ) {}
 
-    public async create(createGood: CreateGoodDto): Promise<Good> {
-        const good: Good = new this.goodModel(createGood);
-        return await good.save();
+    public async create(createGoodData: GoodDto): Promise<Good | string> {
+        const user: Response = await fetch(
+            `http://users-service:3000/products/${createGoodData.idUser}`,
+        );
+        if (!user.ok) {
+            return 'Yes!';
+        }
+
+        const good: Response = await fetch(
+            `http://products-service:3000/products/${createGoodData.idProduct}/check-availabilaty`,
+        );
+        if (!good.ok) {
+            return 'Error of pushing the good!';
+        }
+
+        const createGood: Good = new this.goodModule(createGoodData);
+        return await createGood.save();
     }
 
-    public async update(id: string, payload: CreateGoodDto): Promise<any> {
-        return await this.goodModel
-            .findByIdAndUpdate(id, payload, { new: true })
-            .exec();
-    }
-    public async delete(id: string): Promise<Good> {
-        return await this.goodModel.findByIdAndDelete(id).exec();
-    }
-
-    public async findAll(): Promise<Good[]> {
-        return await this.goodModel.find().exec();
+    public async findAll(): Promise<Array<Good>> {
+        return await this.goodModule.find().exec();
     }
 
     public async findOne(id: string): Promise<Good> {
-        return await this.goodModel.findById(id).exec();
+        return await this.goodModule.findById(id).exec();
     }
 
-    // public async addGood(id: string, newIdGood: string): Promise<Good> {
-    //     return await this.goodModel.
-    // }
+    public async update(id: string, payload: GoodDto): Promise<Good> {
+        return await this.goodModule
+            .findByIdAndUpdate(id, payload, { new: true })
+            .exec();
+    }
+
+    public async delete(id: string): Promise<any> {
+        return await this.goodModule.findByIdAndDelete(id).exec();
+    }
 }
